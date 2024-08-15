@@ -6,6 +6,7 @@ import { useState, useEffect, useRef } from 'react'
 export default function Home() {
   const [messages, setMessages] = useState([]);
   const [message, setMessage] = useState('')
+  const [isTyping, setIsTyping] = useState(false);
 
   useEffect(() => {
     // Add the initial assistant message only on the frontend
@@ -26,6 +27,7 @@ export default function Home() {
       { role: 'user', content: message },
       { role: 'assistant', content: '' },
     ])
+    setIsTyping(true)
 
     try {
       const response = await fetch('/api/chat', {
@@ -61,12 +63,16 @@ export default function Home() {
           ]
         })
       }
+
+      setIsTyping(false)
+
     } catch (error) {
       console.error('Error:', error)
       setMessages((messages) => [
         ...messages,
         { role: 'assistant', content: "I'm sorry, but I encountered an error. Please try again later." },
       ])
+      setIsTyping(false);
     }
   }
 
@@ -151,6 +157,11 @@ export default function Home() {
             Send
           </Button>
         </Stack>
+        {isTyping && (
+            <Box display="flex" justifyContent="center" p={2}>
+              <CircularProgress size={24} /> {/* Typing indicator */}
+            </Box>
+          )}
         <div ref={messagesEndRef} />
       </Stack>
     </Box>
